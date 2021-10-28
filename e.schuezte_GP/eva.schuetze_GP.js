@@ -89,26 +89,37 @@ function draw() {							/* here is the dynamic part to put */
   pop();
 
   push();
-  
+  var resX = 2*gridX;
+  var neX = 88*gridX;
+  var butY = 85*gridY;
+    textAlign(CENTER, CENTER);
+    textFont("Comic Sans MS");
+    textSize(4*grid);
     stroke(outlineColour);
     strokeWeight(4);
     push();
       fill("red");    
-      rect(10*gridX, 85*gridY,buttonWidth, buttonHeight,20);
+      rect(resX, butY,buttonWidth, buttonHeight,20);
+      noStroke()
+      fill("white");
+      text("Reset",resX + 0.5*buttonWidth,butY + 0.5*buttonHeight);
     pop();
     push();
       fill("lightgreen");
-      rect(80*gridX, 85*gridY,buttonWidth, buttonHeight,20);
+      rect(neX, butY,buttonWidth, buttonHeight,20);
+      noStroke()
+      fill("white");
+      text("New",neX + 0.5*buttonWidth,butY + 0.5*buttonHeight);
     pop();
 
     if(mouseIsPressed){
-      if(mouseX >= 10*gridX && mouseX <= (10*gridX)+buttonWidth &&
-         mouseY >= 85*gridY && mouseY <= (85*gridY)+buttonHeight ){
+      if(mouseX >= resX && mouseX <= (resX)+buttonWidth &&
+         mouseY >= butY && mouseY <= butY+buttonHeight ){
         setup();
       }
 
-      if(mouseX >= 80*gridX && mouseX <= (80*gridX)+buttonWidth &&
-      mouseY >= 85*gridY && mouseY <= (85*gridY)+buttonHeight ){
+      if(mouseX >= neX && mouseX <= neX+buttonWidth &&
+      mouseY >= butY && mouseY <= butY+buttonHeight ){
         moveBall();
       }
     }
