@@ -1,9 +1,7 @@
 /* template GTAT2 Game Technology & Interactive Systems */
 
 /* Eve Schütze 4.Übung 25.10.2021*/
-//TODO: Add Text to Buttons
-//TODO: Fix speed on normal
-//TODO: Put buttons 
+//TODO: Add Text to Buttons 
 var canvasWidth = window.innerWidth;
 var canvasHeight = window.innerHeight;
 var x0Shape = canvasWidth;
@@ -26,7 +24,13 @@ var fr;
 var x;
 
 var move;
+var gridX,gridY, grid, buttonHeight,buttonWidth
 
+gridX = canvasWidth/100.0;                       // GridX = 1% Fensterbreite 
+gridY = canvasHeight/100.0;                      // GridY = 1% Fensterhöhe
+grid = Math.sqrt(gridX*gridY);
+buttonWidth = 10*gridX;                    // Buttonbreite 9% Fensterbreite
+buttonHeight = 6*grid; 
 
 
 
@@ -85,27 +89,27 @@ function draw() {							/* here is the dynamic part to put */
   pop();
 
   push();
-  translate(0,0.85*canvasHeight);
+  
     stroke(outlineColour);
     strokeWeight(4);
     push();
       fill("red");    
-      rect(0.5*M, 0, 3*M, 1.2*M,20);
+      rect(10*gridX, 85*gridY,buttonWidth, buttonHeight,20);
     pop();
     push();
       fill("lightgreen");
-      rect((0.8*canvasWidth), 0, 3*M, 1.2*M,20);
+      rect(80*gridX, 85*gridY,buttonWidth, buttonHeight,20);
     pop();
 
     if(mouseIsPressed){
-      if(mouseX >= 0.5*M && mouseX <= 3.5*M &&
-         mouseY >= 0 && mouseY <= 1.2*M ){
-           setup();
-         }
+      if(mouseX >= 10*gridX && mouseX <= (10*gridX)+buttonWidth &&
+         mouseY >= 85*gridY && mouseY <= (85*gridY)+buttonHeight ){
+        setup();
+      }
 
-      if(mouseX >= 21*M && mouseX <= 24.5*M &&
-        mouseY >= 0 && mouseY <= 1.2 ){
-          moveBall();
+      if(mouseX >= 80*gridX && mouseX <= (80*gridX)+buttonWidth &&
+      mouseY >= 85*gridY && mouseY <= (85*gridY)+buttonHeight ){
+        moveBall();
       }
     }
   pop();
