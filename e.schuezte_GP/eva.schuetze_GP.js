@@ -4,20 +4,22 @@
 //TODO: Add Text to Buttons 
 var canvasWidth = window.innerWidth;
 var canvasHeight = window.innerHeight;
-var x0Shape = canvasWidth;
-var y0Shape = canvasHeight*0.8;
+var nullXShape = canvasWidth;
+var nullYShape = canvasHeight*0.8;
 let resetButton;
 let startButton;
 var V0 = 36; //Geschwindigkeit m/s
-var x0;
-var y0;
+var nullX;
+var nullY;
 var M;
 var G;
 var flagPole;
 var flag;
 var water;
 
+var x0;
 
+var beta;
 var t;
 var dt;
 var fr;
@@ -32,6 +34,22 @@ grid = Math.sqrt(gridX*gridY);
 buttonWidth = 10*gridX;                    // Buttonbreite 9% Fensterbreite
 buttonHeight = 6*grid; 
 
+P = [
+    [2.5,0],              
+    [-3.5,0],       
+    [-6.7,-1.5],     
+    [-9.8,0],       
+    //Waterpit
+    [-11.2,0],     
+    //grass
+    [-13.3,0],      
+    [-16.4,0],     
+    //Sandhill
+    [-17,0],        
+    [-19.1,0],      
+    [-22.1,-3]
+]
+
 
 
 function setup() {							/* here are program-essentials to put */
@@ -39,8 +57,9 @@ function setup() {							/* here are program-essentials to put */
   
   background(199, 243, 252);
   
-  x0 = displayWidth*0.898; //The point where the golfball lies at the start
-  y0 = canvasHeight*0.7  //Upper limit of the flat ground. 
+  nullX = displayWidth*0.898; //The point where the golfball lies at the start
+  nullY = canvasHeight*0.7  //Upper limit of the flat ground. 
+  x0=nullX;
   x = 0;
   t = 0;
   
@@ -62,7 +81,7 @@ function draw() {							/* here is the dynamic part to put */
   M = (0.2036*canvasWidth)/5;
    //to control changes in the width of the model
 	/* calculations */
-	
+	beta = Math.atan2(calcSectLength(2,1));
   
   if(move) {
     t = t + dt;
@@ -78,7 +97,7 @@ function draw() {							/* here is the dynamic part to put */
 	/* display */
   
   push();
-    translate(x0,y0);
+    translate(nullX,nullY);
     drawPlayGround();
     
   pop();  
@@ -89,40 +108,7 @@ function draw() {							/* here is the dynamic part to put */
   pop();
 
   push();
-  var resX = 2*gridX;
-  var neX = 88*gridX;
-  var butY = 85*gridY;
-    textAlign(CENTER, CENTER);
-    textFont("Comic Sans MS");
-    textSize(4*grid);
-    stroke(outlineColour);
-    strokeWeight(4);
-    push();
-      fill("red");    
-      rect(resX, butY,buttonWidth, buttonHeight,20);
-      noStroke()
-      fill("white");
-      text("Reset",resX + 0.5*buttonWidth,butY + 0.5*buttonHeight);
-    pop();
-    push();
-      fill("lightgreen");
-      rect(neX, butY,buttonWidth, buttonHeight,20);
-      noStroke()
-      fill("white");
-      text("New",neX + 0.5*buttonWidth,butY + 0.5*buttonHeight);
-    pop();
-
-    if(mouseIsPressed){
-      if(mouseX >= resX && mouseX <= (resX)+buttonWidth &&
-         mouseY >= butY && mouseY <= butY+buttonHeight ){
-        setup();
-      }
-
-      if(mouseX >= neX && mouseX <= neX+buttonWidth &&
-      mouseY >= butY && mouseY <= butY+buttonHeight ){
-        moveBall();
-      }
-    }
+    drawButtons();
   pop();
   //--------------------------------------------------------------------------------------------------------------------------
   
@@ -133,11 +119,18 @@ function moveBall() {
 }
 
 function ball() {
-  translate(x0,y0+ (-0.16*M));
+  translate(nullX,nullY + (-0.16*M));
   noStroke();
   fill(golfBallColour);
   circle(x, 0, 0.32*M);
 }
+
+
+function calcSectLength (Point1, Point2) {  
+    return Math.hypot(P[Point2][0]-P[Point1][0], P[Point2][1], P[Point1][1]);
+}
+
+
 function windowResized() {					/* responsive part */
   canvasWidth = window.innerWidth;
   canvasHeight = window.innerHeight;

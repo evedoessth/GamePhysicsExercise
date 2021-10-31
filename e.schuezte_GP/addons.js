@@ -127,3 +127,40 @@ function drawPlayGround(){
       pop();
     pop();
 }
+
+function drawButtons() {
+  var resX = 2*gridX;
+    var neX = 88*gridX;
+    var butY = 85*gridY;
+    textAlign(CENTER, CENTER);
+    textFont("Comic Sans MS");
+    textSize(4*grid);
+    stroke(outlineColour);
+    strokeWeight(4);
+    push();
+      fill("red");    
+      rect(resX, butY,buttonWidth, buttonHeight,20);
+      noStroke()
+      fill("white");
+      text("Reset",resX + 0.5*buttonWidth,butY + 0.5*buttonHeight);
+    pop();
+    push();
+      fill("lightgreen");
+      rect(neX, butY,buttonWidth, buttonHeight,20);
+      noStroke()
+      fill("white");
+      text("New",neX + 0.5*buttonWidth,butY + 0.5*buttonHeight);
+    pop();
+
+    if(mouseIsPressed){
+      if(mouseX >= resX && mouseX <= (resX)+buttonWidth &&
+         mouseY >= butY && mouseY <= butY+buttonHeight ){
+        setup();
+      }
+
+      if(mouseX >= neX && mouseX <= neX+buttonWidth &&
+      mouseY >= butY && mouseY <= butY+buttonHeight ){
+        moveBall();
+      }
+    }
+}
