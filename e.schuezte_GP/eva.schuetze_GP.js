@@ -1,21 +1,32 @@
 /* template GTAT2 Game Technology & Interactive Systems */
 
 /* Eve Schütze 4.Übung 25.10.2021*/
-//TODO: Add Text to Buttons 
+
 var canvasWidth = window.innerWidth;
 var canvasHeight = window.innerHeight;
 var nullXShape = canvasWidth;
 var nullYShape = canvasHeight*0.8;
 let resetButton;
 let startButton;
-var V0 = 36; //Geschwindigkeit m/s
-var nullX;
-var nullY;
+var Vreal = 3.6; //Geschwindigkeit m/s
+var V0;
+
+var nullX = canvasWidth*0.898; //The point where the golfball lies at the start
+var nullY = canvasHeight*0.7  //Upper limit of the flat ground.
+
 var M;
 var G;
 var flagPole;
 var flag;
 var water;
+
+var rBall = 0.16;
+var dBall = 0.32;
+
+var sBall;
+var vBall;
+var grav = 9.81;
+var gStrich;
 
 var x0;
 
@@ -57,14 +68,13 @@ function setup() {							/* here are program-essentials to put */
   
   background(199, 243, 252);
   
-  nullX = displayWidth*0.898; //The point where the golfball lies at the start
-  nullY = canvasHeight*0.7  //Upper limit of the flat ground. 
-  x0=nullX;
+  
   x = 0;
   t = 0;
   
   move = false;
-
+  V0 = Vreal*M;
+  vxBall = V0;
   fr = 60;
   frameRate(fr);
   dt = 1.0 / fr;
@@ -79,33 +89,53 @@ function draw() {							/* here is the dynamic part to put */
 	/* administrative work */
   background(199, 243, 252);
   M = (0.2036*canvasWidth)/5;
+  
+  x0=nullX;
    //to control changes in the width of the model
 	/* calculations */
 	beta = Math.atan2(calcSectLength(2,1));
-  
+  gStrich = grav * Math.sin(beta);
   if(move) {
     t = t + dt;
     x = x-V0 * dt;
-    if(x <= -3.5*M) {
-      x = -3.5*M;
-      move = false;
-      t = 0;
-    
+    if(x <= P[1][0]*M) {
+      
+        sBall = 0;
+        vBall = vxBall;
+      
+    }
+
+    else {
+      vBall = vBall- gStrich *dt;
+      sBall = sBall +vBall *dt;
     }
   }
 
 	/* display */
   
   push();
+     
     translate(nullX,nullY);
     drawPlayGround();
     
   pop();  
 
+
+  // calculate beta, g' and length with the formulas
+  // v=v*g'*dt
+  //s=s*vs*dt
+
   //Ball
-  push();
-    ball();    
-  pop();
+  /*push();
+    translate(nullX,nullY);
+    noStroke();
+    fill(golfBallColour); 
+    push();
+        translate(P[1][0],P[1][1]);
+        rotate(beta); 
+        ellipse(sBall*M, -rBall*M, dBall*M);
+    pop(); 
+  pop();*/
 
   push();
     drawButtons();
@@ -118,12 +148,7 @@ function moveBall() {
   move = true;
 }
 
-function ball() {
-  translate(nullX,nullY + (-0.16*M));
-  noStroke();
-  fill(golfBallColour);
-  circle(x, 0, 0.32*M);
-}
+
 
 
 function calcSectLength (Point1, Point2) {  
