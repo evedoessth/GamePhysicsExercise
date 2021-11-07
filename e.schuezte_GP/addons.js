@@ -161,6 +161,7 @@ function drawButtons() {
       if(mouseX >= neX && mouseX <= neX+buttonWidth &&
       mouseY >= butY && mouseY <= butY+buttonHeight ){
         moveBall();
+        
       }
     }
 }

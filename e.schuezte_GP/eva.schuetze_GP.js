@@ -2,14 +2,17 @@
 
 /* Eve Schütze 4.Übung 25.10.2021*/
 
+
+//TODO:when ball gets to p1 switch to different beta, len, s and 
 var canvasWidth = window.innerWidth;
 var canvasHeight = window.innerHeight;
 var nullXShape = canvasWidth;
 var nullYShape = canvasHeight*0.8;
 let resetButton;
 let startButton;
-var Vreal = 3.6; //Geschwindigkeit m/s
+var Vreal = 2; //Geschwindigkeit m/s
 var V0;
+var vxBall;
 
 var nullX = canvasWidth*0.898; //The point where the golfball lies at the start
 var nullY = canvasHeight*0.7  //Upper limit of the flat ground.
@@ -26,11 +29,14 @@ var dBall = 0.32;
 var sBall;
 var vBall;
 var grav = 9.81;
-var gStrich;
-
+var gStrich = [];
+var beta;
+var beta_arr = [];
+var len = [];
 var x0;
 
-var beta;
+
+
 var t;
 var dt;
 var fr;
@@ -59,8 +65,23 @@ P = [
     [-17,0],        
     [-19.1,0],      
     [-22.1,-3]
-]
+];
 
+for(let i = 0; i<P.length-1; i++){
+  let be = Math.atan2(P[i][1]-P[i+1][1],P[i][0]-P[i+1][0]);
+  beta_arr.push(be);
+}
+for(let j = 0; j<beta_arr.length; j++) {
+  let gs = grav * Math.sin(beta_arr[j]);
+  gStrich.push(gs);
+}
+
+for(let k = 0; k<P.length-1;k++){
+  let l = Math.sqrt(Math.pow(P[k][0]-P[k+1][0],2)+ Math.pow(P[k][1]-P[k+1][1],2));
+  len.push(l);
+}
+console.log(gStrich);
+console.log(beta_arr);
 
 
 function setup() {							/* here are program-essentials to put */
@@ -73,11 +94,12 @@ function setup() {							/* here are program-essentials to put */
   t = 0;
   
   move = false;
-  V0 = Vreal*M;
+  V0 = Vreal;
   vxBall = V0;
   fr = 60;
   frameRate(fr);
   dt = 1.0 / fr;
+  
 
   
 
@@ -93,23 +115,37 @@ function draw() {							/* here is the dynamic part to put */
   x0=nullX;
    //to control changes in the width of the model
 	/* calculations */
+
+  switch(status) {
+    case "1.plane":
+    case "1.slope": 
+
+  }
+
 	beta = Math.atan2(calcSectLength(2,1));
-  gStrich = grav * Math.sin(beta);
-  if(move) {
+  calcGStrich(beta);
+  /*if(move) {
     t = t + dt;
     x = x-V0 * dt;
-    if(x <= P[1][0]*M) {
+    if(s < than len of 1st plane) {
       
+        
         sBall = 0;
         vBall = vxBall;
       
     }
-
-    else {
-      vBall = vBall- gStrich *dt;
-      sBall = sBall +vBall *dt;
+  } */
+  if(move) {
+    t = t + dt;
+    x = x-V0 * dt;
+    if(x <= -3.5*M) {
+      x = -3.5*M;
+      move = false;
+      t = 0;
+    
     }
   }
+  
 
 	/* display */
   
@@ -117,8 +153,8 @@ function draw() {							/* here is the dynamic part to put */
      
     translate(nullX,nullY);
     drawPlayGround();
-    
   pop();  
+    
 
 
   // calculate beta, g' and length with the formulas
@@ -126,16 +162,17 @@ function draw() {							/* here is the dynamic part to put */
   //s=s*vs*dt
 
   //Ball
-  /*push();
+  push();
     translate(nullX,nullY);
-    noStroke();
-    fill(golfBallColour); 
-    push();
-        translate(P[1][0],P[1][1]);
-        rotate(beta); 
-        ellipse(sBall*M, -rBall*M, dBall*M);
-    pop(); 
-  pop();*/
+    ball();
+    /*push();
+      translate(P[1][0],(P[1][1] - rBall)*M);
+      rotate(beta);
+       
+          
+          
+    pop();*/
+  pop();
 
   push();
     drawButtons();
@@ -148,7 +185,19 @@ function moveBall() {
   move = true;
 }
 
+function calcGStrich(angle) {
+  gStrich = grav * Math.sin(angle);
+}
 
+function ball() {
+  noStroke();
+  fill(golfBallColour);
+  circle(x*M, -rBall*M, dBall*M);
+}
+
+function addBetaToArray() {
+  beta_arr[0]=Math.atan2(Math.hypot(P[1][0]-P[0][0], P[1][1], P[0][1]));
+}
 
 
 function calcSectLength (Point1, Point2) {  
