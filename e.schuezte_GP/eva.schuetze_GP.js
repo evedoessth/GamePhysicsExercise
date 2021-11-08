@@ -1,21 +1,27 @@
 /* template GTAT2 Game Technology & Interactive Systems */
 
-/* Eve Schütze 4.Übung 25.10.2021*/
+/* Eve Schütze 4.Übung 08.11.2021*/
+//Done with help by Laura Unverzagt (State Machine and change to different state) 
 
 
-//TODO:when ball gets to p1 switch to different beta, len, s and 
+//TODO:when ball gets to p1 switch to different beta, len_arr, s and 
 var canvasWidth = window.innerWidth;
 var canvasHeight = window.innerHeight;
 var nullXShape = canvasWidth;
 var nullYShape = canvasHeight*0.8;
 let resetButton;
 let startButton;
+var state;
+
 var Vreal = 2; //Geschwindigkeit m/s
 var V0;
-var vxBall;
+//var vxBall;
 
 var nullX = canvasWidth*0.898; //The point where the golfball lies at the start
 var nullY = canvasHeight*0.7  //Upper limit of the flat ground.
+
+var x0 = 0;
+var y0 = 0;
 
 var M;
 var G;
@@ -25,25 +31,24 @@ var water;
 
 var rBall = 0.16;
 var dBall = 0.32;
+var vBall = 0;
+var xBall;
+var yBall;
 
-var sBall;
-var vBall;
-var grav = 9.81;
+var G_CONSTANT = 9.81;
 var gStrich = [];
-var beta;
-var beta_arr = [];
-var len = [];
-var x0;
-
+var grav;
+var beta = 0, beta_arr = [];
+var len = 0, len_arr = [];
 
 
 var t;
 var dt;
 var fr;
-var x;
+var s;
 
 var move;
-var gridX,gridY, grid, buttonHeight,buttonWidth
+var gridX, gridY, grid, buttonHeight,buttonWidth
 
 gridX = canvasWidth/100.0;                       // GridX = 1% Fensterbreite 
 gridY = canvasHeight/100.0;                      // GridY = 1% Fensterhöhe
@@ -72,34 +77,32 @@ for(let i = 0; i<P.length-1; i++){
   beta_arr.push(be);
 }
 for(let j = 0; j<beta_arr.length; j++) {
-  let gs = grav * Math.sin(beta_arr[j]);
+  let gs = G_CONSTANT * Math.sin(beta_arr[j]);
   gStrich.push(gs);
 }
 
 for(let k = 0; k<P.length-1;k++){
   let l = Math.sqrt(Math.pow(P[k][0]-P[k+1][0],2)+ Math.pow(P[k][1]-P[k+1][1],2));
-  len.push(l);
+  len_arr.push(l);
 }
-console.log(gStrich);
-console.log(beta_arr);
 
 
 function setup() {							/* here are program-essentials to put */
   createCanvas(windowWidth, windowHeight);
-  
+  state = "start";
   background(199, 243, 252);
+  xBall = 0;
+  yBall = 0;
   
-  
-  x = 0;
+  s = 0;
   t = 0;
   
   move = false;
   V0 = Vreal;
-  vxBall = V0;
+  //vxBall = V0;
   fr = 60;
   frameRate(fr);
   dt = 1.0 / fr;
-  
 
   
 
@@ -112,40 +115,42 @@ function draw() {							/* here is the dynamic part to put */
   background(199, 243, 252);
   M = (0.2036*canvasWidth)/5;
   
-  x0=nullX;
+  
    //to control changes in the width of the model
 	/* calculations */
-
-  switch(status) {
-    case "1.plane":
-    case "1.slope": 
-
-  }
-
-	beta = Math.atan2(calcSectLength(2,1));
-  calcGStrich(beta);
-  /*if(move) {
-    t = t + dt;
-    x = x-V0 * dt;
-    if(s < than len of 1st plane) {
-      
-        
-        sBall = 0;
-        vBall = vxBall;
-      
-    }
-  } */
-  if(move) {
-    t = t + dt;
-    x = x-V0 * dt;
-    if(x <= -3.5*M) {
-      x = -3.5*M;
-      move = false;
-      t = 0;
-    
-    }
+  if(s<P[1][0]){
+  console.log("1.slope");
+    state = "1.slope";
+    vBall = v;
+    beta = beta_arr[1];
+    x0 = P[1][0];
+    y0 = P[1][1];
   }
   
+  grav = gStrich[0];
+  switch(state) {
+    case "start" : 
+                  beta = beta_arr[0];
+                  x0 = xBall;
+                  t = 0;
+                  v = V0;
+                  break;
+    case "1.plane": 
+                    beta = beta_arr[0];
+                    if(move) {
+                      
+                      s = s-V0 * dt;
+                    }
+                    break;
+    case "1.slope": 
+                    vBall = vBall + grav * dt;
+                    s = s + vBall * dt;
+                    xBall = x0 - s* Math.cos(beta) - (0.5*dBall)*Math.sin(beta);
+                    yBall = s * Math.sin(beta) - (0.5*dBall) * Math.cos(beta);
+                    break;
+                    
+  }
+  t = t + dt;
 
 	/* display */
   
@@ -157,53 +162,51 @@ function draw() {							/* here is the dynamic part to put */
     
 
 
-  // calculate beta, g' and length with the formulas
-  // v=v*g'*dt
-  //s=s*vs*dt
+  
 
   //Ball
   push();
     translate(nullX,nullY);
-    ball();
-    /*push();
-      translate(P[1][0],(P[1][1] - rBall)*M);
-      rotate(beta);
-       
+    
+    push();
+      translate(x0,(y0 +(0.5*rBall)*M));
+      //translate(0,ball.y+(0.5*rBall)*M);
+      rotate(beta_arr[0]);
+      ball(); 
+         
           
-          
-    pop();*/
+    pop();
   pop();
 
   push();
     drawButtons();
   pop();
   //--------------------------------------------------------------------------------------------------------------------------
-  
+  drawDebug()
 }
 
 function moveBall() {
   move = true;
+  state = "1.plane";
 }
 
-function calcGStrich(angle) {
-  gStrich = grav * Math.sin(angle);
-}
 
 function ball() {
   noStroke();
   fill(golfBallColour);
-  circle(x*M, -rBall*M, dBall*M);
+  circle(s*M, -rBall*M, dBall*M);
 }
 
-function addBetaToArray() {
-  beta_arr[0]=Math.atan2(Math.hypot(P[1][0]-P[0][0], P[1][1], P[0][1]));
+function drawDebug() {
+  text('betaArray: ' + beta_arr,100,100);
+  text('currentBeta: ' + beta, 100,125);
+  text('xBall: ' + xBall,100,150);
+  text('yBall: ' + yBall,100,160);
+  text('stateMachine: ' + state,100,200);
+  text('s: ' + s,100,210);
+  text('x0: ' + x0,100,220);
+  text('y0: ' + y0,100,230);
 }
-
-
-function calcSectLength (Point1, Point2) {  
-    return Math.hypot(P[Point2][0]-P[Point1][0], P[Point2][1], P[Point1][1]);
-}
-
 
 function windowResized() {					/* responsive part */
   canvasWidth = window.innerWidth;
