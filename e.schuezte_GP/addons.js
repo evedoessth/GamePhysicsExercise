@@ -6,6 +6,8 @@ var grassColour = [55, 184, 94];
 var golfBallColour = [245, 145, 127];
 var sandColour = [255, 226, 138];
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var N = [0, 0];								// Nullpunkt
+var Point = [0, 0];	          // variabler Punkt
 
 G = [ 
     [2.5,1.4],      //0
@@ -49,6 +51,10 @@ G = [
     [-13.5,1],
     [-13.5,0.2]
   ];
+
+  
+
+
 
 function drawPlayGround(){
     strokeWeight(2);
@@ -131,10 +137,11 @@ function drawPlayGround(){
 function drawButtons() {
   var resX = 2*gridX;
     var neX = 88*gridX;
+    var paX = 45*gridX;
     var butY = 85*gridY;
     textAlign(CENTER, CENTER);
     textFont("Comic Sans MS");
-    textSize(4*grid);
+    textSize(3*grid);
     stroke(outlineColour);
     strokeWeight(4);
     push();
@@ -143,6 +150,13 @@ function drawButtons() {
       noStroke()
       fill("white");
       text("Reset",resX + 0.5*buttonWidth,butY + 0.5*buttonHeight);
+    pop();
+    push();
+      fill("lightblue");    
+      rect(paX, butY,buttonWidth, buttonHeight,20);
+      noStroke()
+      fill("white");
+      text("Pause",paX + 0.5*buttonWidth,butY + 0.5*buttonHeight);
     pop();
     push();
       fill("lightgreen");
@@ -156,6 +170,11 @@ function drawButtons() {
       if(mouseX >= resX && mouseX <= (resX)+buttonWidth &&
          mouseY >= butY && mouseY <= butY+buttonHeight ){
         setup();
+      }
+
+      if(mouseX >= paX && mouseX <= (paX)+buttonWidth &&
+         mouseY >= butY && mouseY <= butY+buttonHeight ){
+        move = false;
       }
 
       if(mouseX >= neX && mouseX <= neX+buttonWidth &&
