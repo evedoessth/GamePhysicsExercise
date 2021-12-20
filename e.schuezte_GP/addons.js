@@ -151,13 +151,7 @@ function drawButtons() {
       fill("white");
       text("Reset",resX + 0.5*buttonWidth,butY + 0.5*buttonHeight);
     pop();
-    push();
-      fill("lightblue");    
-      rect(paX, butY,buttonWidth, buttonHeight,20);
-      noStroke()
-      fill("white");
-      text("Pause",paX + 0.5*buttonWidth,butY + 0.5*buttonHeight);
-    pop();
+    
     push();
       fill("lightgreen");
       rect(neX, butY,buttonWidth, buttonHeight,20);
@@ -172,14 +166,9 @@ function drawButtons() {
         setup();
       }
 
-      if(mouseX >= paX && mouseX <= (paX)+buttonWidth &&
-         mouseY >= butY && mouseY <= butY+buttonHeight ){
-        move = false;
-      }
-
       if(mouseX >= neX && mouseX <= neX+buttonWidth &&
       mouseY >= butY && mouseY <= butY+buttonHeight ){
-        moveBall();
+        newB();
         
       }
     }

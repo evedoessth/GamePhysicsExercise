@@ -1,17 +1,15 @@
 /* template GTAT2 Game Technology & Interactive Systems */
 
-/* Eve Schütze 5.Übung 08.11.2021*/
-//Done with help by Laura Unverzagt (State Machine and change to different state) 
+/* Eve Schütze 6.Übung 15.11.2021*/
+//Done with help by Laura Unverzagt and Liz Kintzel (State Machine and change to different state ) 
+//CR is my work
 
 
 //TODO:when ball gets to p1 switch to different beta, len_arr, s and 
 var canvasWidth = window.innerWidth;
 var canvasHeight = window.innerHeight;
-var nullXShape = canvasWidth;
-var nullYShape = canvasHeight*0.8;
 let resetButton;
 let startButton;
-var state;
  
 
 var nullX = canvasWidth*0.898; //The point where the golfball lies at the start
@@ -28,18 +26,23 @@ var water;
 
 var rBall = 0.16;
 var dBall = 0.32;
-var vBall = 0;
-var xBall, yBall;
-var xBall0;
-var vxBall, vyBall;
-var vx0Ball = 2; //Geschwindigkeit m/s
-var vy0Ball = 0;
 
-var G_CONSTANT = 9.81;
-var gStrich = [];
-var grav;
+var xBall, yBall;
+
+var v0 = -1;
+var v;
+var vs = 0;
+var vy;
+var v0X, v0Y;
+var grenzwert = 0.1;
+
+
+var g = 9.81; 
+var G_;
+var cR =0.2;
+var ground;
 var beta = 0, beta_arr = [];
-var len = 0, len_arr = [];
+var sign = -1;
 
 
 var t;
@@ -48,7 +51,8 @@ var timeScale;
 var fr;
 var s;
 
-var START, INIT;
+	
+var RESET, reset, START = false;
 var gridX, gridY, grid, buttonHeight,buttonWidth
 
 gridX = canvasWidth/100.0;                       // GridX = 1% Fensterbreite 
@@ -72,38 +76,45 @@ P = [
     [-19.1,0],      
     [-22.1,-3]
 ];
+const states = {
+  OFF: "off",
+  PLANE_1: {
+      TOL: "1. Ebene, to the left",
+      TOR: "1. Ebene, to the right"
+  },
+  SLOPE_1: "1. schiefe Ebene",
+  THROW: "schräger Wurf"
 
+};
+let state = states.OFF;
 
 
 function setup() {							/* here are program-essentials to put */
   createCanvas(windowWidth, windowHeight);
-  state = "start";
+  state = states.OFF;
   background(199, 243, 252);
   xBall = 0;
   yBall = dBall/2;
-  
+  x0 = 0;
   s = 0;
   t = 0;
   
-  START = false;
-  vBall = vx0Ball;
+  
+  vs = v0;
   fr = 60;
   frameRate(fr);
   timeScale = 1.0;
-  dt = 0;
+  dt = timeScale/fr;
 
-  for(let i = 1; i<P.length-1; i++){
-    beta_arr[i] = Math.atan2(P[i+1][1]-P[i][1],P[i+1][0]-P[i][0]);
-    gStrich[i] = G_CONSTANT * Math.sin(beta_arr[i]);
-    len_arr[i] = Math.sqrt(Math.pow(P[i+1][1]-P[i][1],2)+ Math.pow(P[i+1][0]-P[i+1][0],2));
-    //len_arr.push(l);
-    console.log(i+" beta: "+degrees(beta_arr[i])+"° l: "+len_arr[i]);
+  beta_arr = [];
+  for(let i = 0; i<P.length-1; i++){
+    let x = P[i][1] - P[i+1][1];
+    let y = P[i][0] - P[i+1][0];
+    let be = Math.atan2(x,y);
+    beta_arr.push(be);
+    //console.log(be);
   }
-  beta_arr[0] = Math.PI;											// Neigungswinkel 1. plane
-	len_arr[0] = Math.sqrt(Math.pow(P[1][1]-N[1],2) + Math.pow(P[1][0]-N[0],2));		// Länge 1. plane
-	gStrich[0] = 0;
-	console.log(0+" beta: "+degrees(beta_arr[0])+"° l: "+len_arr[0]);
-
+  
 
 }
 
@@ -113,134 +124,82 @@ function draw() {							/* here is the dynamic part to put */
   background(199, 243, 252);
   M = (0.2036*canvasWidth)/5;
   
-  
-   //to control changes in the width of the model
-	/* calculations */
-  if(START) {
+ 
+  if (state===states.PLANE_1.TOR && xBall>=P[0][0]) {
+    state = states.OFF;
+}
+if (state===states.SLOPE_1 && xBall>=P[1][0]) {
+      x0 = xBall;
+      v = vs;
+      ground = "grass";
+    state = states.PLANE_1.TOR;
+}
+if (state===states.PLANE_1.TOL && xBall<=P[1][0]) {
+    xBall = P[1][0];
+    x0 = xBall;
+		vs = v;
+    ground = "grass";
+    s=0;
+    state = states.SLOPE_1;
+}
+if (state===states.SLOPE_1 && xBall<=P[2][0]) {
+    x0=xBall;
+    y0=yBall;
+    vx = vs*Math.cos(beta);
+    vy = vs*Math.sin(beta);
+    vy = v0Y -g * dt;
+    state = states.THROW;
+}
+if(abs(v)<grenzwert){ 
+  state = states.OFF; 
+  //console.log("heh");
+}
 
-    beta = beta_arr[0];
-    len = len_arr[0];
-    Point = N;  
-    if(INIT) {
-      INIT = false;
-      START = false;
-      xBall = 0;							// Startlage Golfball
-			yBall = dBall/2;
-      vxBall = vx0Ball;					// Startgeschwindigkeit setzen
-      vyBall = 0;
-      t = 0; 
-    }
-  }
-  else {
-    
-    grav = gStrich[0];
-    if(state == "start") {
-                    state = "1.plane";
-                    s = 0;
-                    vs = Math.abs(vxBall);
-                    Point = N;
-    }
-    switch(state) {
-      case "1.plane": 
-                    if (len_arr[0] > s && xBall <= P[0][0])
-                    {	// Ortsberechnung
-                      grav = gStrich[0];
-                      beta = beta_arr[0];
-                      len = len_arr[0];
-                      xBall0 = N[0];
-                      console.log("1.plane");		
-                    }
-                  else
-                    {	// Übergang 1.plane -> 1.slope
-                      state = "1.slope";				// Status ändern
-                      console.log("goto 1.slope");
-                      s = 0;							// Weg rücksetzen
-                      xBall0 = P[1][0];				// für calculation
-                      beta = beta_arr[1];				// für calculation & display
-                      len = len_arr[1];
-                      Point = P[1];					// für display
-                    }
 
-                  if(xBall >= P[0][0])					// Endbedingung rechter Rand
-                    {
-                      state = "end";
-                      dt = 0;							// Stop
-                      beta = Math.PI;
-                      len = len_arr[0];
-                      Point = P[0];
-                      xBall0 = P[0][0];
-                      s = 0;
-                      //console.log("*"+P[0][0]);
-                    } 
-                  break;
-      case "1.slope": 
-                  if(len_i[0] > s && xBall <= P[0][0]){
-                    grav = gStrich[1];
-                    beta = beta_arr[1];
-                    len = len_arr[1];
-                    xBall0 = P[1][0];
-                  }
-                  else  {
-                    if (s >= len_arr[1])
-                      {	// Übergang 1.slope -> 2.slope
-                        state = "2.slope";
-                        //console.log("goto 2.slope"+" "+len_i[2]);
-                        s = 0;
-                        beta = beta_arr[2];
-                        len = len_arr[2];
-                        Point = P[2];
-                        xBall0 = P[2][0];
-                        break;
-                      }
-                    if (s <= 0) 
-                      {	// Übergang 1.slope -> 1.plane
-                        state = "1.plane";
-                        console.log("goto 1.plane");
-                        s = len_arr[0];
-                        beta = PI;
-                        len = len_arr[0];
-                        xBall0 = N[0];
-                        Point = N;
-                      }
-                    }
-                      break;
-                      
-      case "2.plane":		
-                  if (len_i[3] > s) {	// Ortsberechnung
-                      grav = gStrich[3];
-                      beta = beta_arr[3];
-                      len = len_arr[3];
-                      xBall0 = P[3][0];
-                      console.log("2.plane");		
-                  }
-                  else {	// Ende im Wasser
-                      state = "water";				// Status ändern
-                      console.log("in water");
-                      s = 0;							// Weg rücksetzen
-                      xBall0 = P[3][0];
-                      dt = 0;
-                  }
-                    break;
+
+
+switch (state) {
+    case states.OFF: {
+        x0 = xBall;
+        v = v0;
+        
+        break;
     }
-      
-    switch (state)															// Berechnung ausführen
-              {
-                case "1.plane":
-                case "1.slope":
-                case "2.slope":
-                case "2.plane":
-                case "3.plane":
-                case "4.plane":
-                case "3.slope": 	
-                          vBall = vBall + grav * dt;							
-                          s = s + vBall * dt;
-                          xBall = xBall0 + s * cos(beta);
-                          yBall = s * sin(beta);
-                          break;
-              }
-    t = t + dt;
-  }
-  
+    case states.PLANE_1.TOL:
+    case states.PLANE_1.TOR:{
+        //console.log(state);
+        beta = beta_arr[0];
+        if (vs>0) sign = 1;
+        G_ = gCalculation();
+        v = v - G_ * dt;
+			  s = s + v * dt;
+			  xBall = x0 + s*Math.cos(beta) + rBall*Math.sin(beta);
+			  yBall = P[0][1] + rBall;
+        //console.log(G_);
+        break;
+        
+    }
+    case states.SLOPE_1: {
+        //console.log(state);
+        beta = beta_arr[1];
+        xBall = x0;   
+        if (vs>0) sign = 1;
+        G_ = gCalculation();
+        vs = vs + G_ * dt;
+			  s = s + vs * dt;
+			  xBall = x0 - s*Math.cos(beta)*dt + rBall*Math.sin(beta);	
+			  yBall = s*Math.sin(beta)*dt + rBall*Math.cos(beta);  
+        //console.log("s: " + s + " state: " + state + " beta: " + beta + " x: " + xBall + "y: " + yBall);
+        break;
+    }
+    /*case states.THROW: {
+        ballPos[0] = ballPos[0] + v0X * dt;
+        vy = vy -g*dt;
+        ballPos[1] = ballPos[1] + vy * dt;
+        break;
+    }*/
+}
+              
 
 
 	/* display */
@@ -258,11 +217,10 @@ function draw() {							/* here is the dynamic part to put */
   //Ball
   push();
     translate(nullX,nullY);
-    scale(1, -1);
+    
     push();
-      translate(x0,y0);
-      //translate(0,ball.y+(0.5*rBall)*M);
-      rotate(beta_arr[0]);
+      translate(x0, y0);
+      
       ball(); 
          
           
@@ -274,19 +232,32 @@ function draw() {							/* here is the dynamic part to put */
   pop();
   //--------------------------------------------------------------------------------------------------------------------------
   drawDebug()
+
 }
 
-function moveBall() {
-  START = true;
-  INIT = true;
-  state = "start";
+function changeCR() {
+  if(ground == "grass") {
+    cR = 2.0;
+  }
+  else if (ground == "sand") {
+    cR = 1.5;
+  }
+  else {
+    cR = 0;
+  }
+  return cR;
 }
 
-
+function gCalculation() {
+	let gStrich = sign * g * (Math.sin(beta) + cR*Math.cos(beta));			// sign / -1 für wenn auf horizontale, kein Plan was für schräge Ebene
+	//console.log("sign: " + sign + " beta: " + beta + " cr: " + cR)
+  return gStrich;
+}
 function ball() {
+  
   noStroke();
   fill(golfBallColour);
-  circle(s*M, -rBall*M, dBall*M);
+  circle(xBall*M, -rBall*M, dBall*M);
 }
 
 function drawDebug() {
@@ -295,11 +266,17 @@ function drawDebug() {
   text('xBall: ' + xBall,100,150);
   text('yBall: ' + yBall,100,160);
   
-  text('yBall*M: ' + yBall*M,100,170);
+  text('vBall: ' + -vs,100,170);
   text('stateMachine: ' + state,100,200);
   text('s: ' + s,100,210);
   text('x0: ' + x0,100,220);
   text('y0: ' + y0,100,230);
+}
+function newB(){
+  // wtf JS???? lemme just compare a goddamn array
+  if (xBall == 0) {
+      state = states.PLANE_1.TOL;
+  }
 }
 
 function windowResized() {					/* responsive part */
