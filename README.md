@@ -1,3 +1,26 @@
+# GamePhysics Golfgame
+
+Welcome to the Ultimate Golfgame, a physics based game written in JavaScript using the p5.js library (additional README part underneath)
+As of now (December 2021) this game is being developed during the exercises of my university class "Game Physics". 
+## Covered Topics:
+* Exercise 1: Building of the world
+* Exercise 2: Responsive scale
+* Exercise 3: Move the ball horizontally and add buttons
+* Exercise 4: Movement on a slope, state machine
+* Exercise 5: Projectile motion without air friction
+* Exercise 6: Rolling friction
+* Exercise 7: Collision detection
+* Exercise 8: Flow resistance
+* Exercise 9: Wind
+
+## Note
+The code in the main branch is based on the solution of my professor Dr. -Ing. V. Naumburger starting from the 4th exercise. All further changes (exercise 5-9 as of 20th December 2021) were made by myself. 
+
+My own solutions to exercise 1-4 can be found in the branch "Exercise-4".
+
+
+------------
+
 # Welcome to p5.js
 
 You have downloaded the complete p5.js library ZIP file, yay!
