@@ -376,7 +376,7 @@ function draw() {
 					if(yBall <= 0) {
 						
 						
-						// -4.03 -3.87 -3.4
+						
 						if(P[5][0] < xBall && xBall < P[4][0]){
 							//xBall = (P[5][0]+P[4][0])/2;
 							//yBall = (G[6][1]+0.5*dBall);
